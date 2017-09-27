@@ -5,10 +5,14 @@ import paho.mqtt.publish as publish
 import usb.core
 import usb.util
 import time
+import datetime
   
 #Set channel Identification
-ID = "264331"
-Key = "NCBCW09Y7I1RJM3A"
+# ID = "264331"
+# Key = "NCBCW09Y7I1RJM3A"
+
+ID = "332852"
+Key = "CP7KTK15VEUHL7UG"
 myChannel = "channels/" + ID + "/publish/" + Key
 
 #ThingSpeak MQTT domain
@@ -36,11 +40,12 @@ device.set_configuration()
 #read CPM values every 1 second 
 #upload average of past 60 values every 60seconds
 i = 1
+ireset = 15
 CPMadd = 0
-CPMmax=0
+CPMmax = 0
 while True:
 	
-	if i<=60:
+	if i<=ireset:
 		data = device.read(0X81,15)
 		CPM = data[5]
 		if CPM>CPMmax:
@@ -48,36 +53,28 @@ while True:
 		time.sleep(1)
 		CPMadd = CPMadd+CPM
 		#print("CPMadd=",CPMadd)
-		print("CPM=",CPM)
+		print(str(datetime.datetime.now()) + ": CPM=",CPM)
 		#print("i = ",i)
 		i = i +1 
 	
 
 	else:
-                CPMavg = CPMadd/60
-		print("  CPMavg =",CPMavg)
+                CPMavg = CPMadd/ireset
+		print(str(datetime.datetime.now()) + ": CPMavg=",CPMavg)
+		print(str(datetime.datetime.now()) + ": CPMmax=",CPMmax)
+		dataString = "field1=" + str(CPMavg) + "&field2=" + str(CPMmax)
+		
 		i = 1
 		CPMadd = 0
-    		dataString1 = "field1=" + str(CPMavg)
-    		dataString2 = "field2=" + str(CPMmax)
-	# publish data to channel using parameters for MQTT 
+		CPMmax=0
+    		#  publish data to channel using parameters for MQTT 
     		try:
-				publish.single(myChannel, payload=dataString1, hostname=mqttHost, port=tPort, tls=tTLS, transport=tTransport)
+				publish.single(myChannel, payload=dataString, hostname=mqttHost, port=tPort, tls=tTLS, transport=tTransport)
 		except (KeyboardInterrupt):
         		break
 		except:
-        		print ("Data was not uploaded.")
-
-                print("CPMavg=",CPMavg)
-        	try:
-				publish.single(myChannel, payload=dataString2, hostname=mqttHost, port=tPort, tls=tTLS, transport=tTransport)
-		except (KeyboardInterrupt):
-        		break
-		except:
-        		print ("Data was not uploaded.")
-                print("CPMmax=",CPMmax)
-                CPMmax=0
-
+        		print (str(datetime.datetime.now()) + ": Data was not uploaded.")
+                
 usb.util.dispose_resources(dev)
 
 if reattach:
