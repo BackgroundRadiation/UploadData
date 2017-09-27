@@ -80,12 +80,12 @@ while True:
 		CPMadd = 0
 		CPMmax=0
 			#  publish data to channel using parameters for MQTT 
-			try:
-				publish.single(myChannel, payload=dataString, hostname=mqttHost, port=tPort, tls=tTLS, transport=tTransport)
+		try:
+			publish.single(myChannel, payload=dataString, hostname=mqttHost, port=tPort, tls=tTLS, transport=tTransport)
 		except (KeyboardInterrupt):
-				break
+			break
 		except Exception as e:
-				sys.stderr.write(str(datetime.datetime.now()) + ": Data was not uploaded - " + str(e))
+			sys.stderr.write(str(datetime.datetime.now()) + ": Data was not uploaded - " + str(e) + '\n')
 				
 usb.util.dispose_resources(dev)
 
