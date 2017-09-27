@@ -67,7 +67,7 @@ while True:
 			CPMmax=CPM
 		CPMadd = CPMadd+CPM
 		#print("CPMadd=",CPMadd)
-		print(str(datetime.datetime.now()) + ", %d" % CPM + CPMStatsStr)
+		print(str(datetime.datetime.now()) + ",%d" % CPM + CPMStatsStr)
 		CPMStatsStr = ',,'
 		i = i + 1 
 	
