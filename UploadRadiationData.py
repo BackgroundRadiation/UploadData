@@ -73,7 +73,7 @@ while True:
 	
 	else:
 		CPMavg = CPMadd/ireset
-		CPMStatsStr = ', %d, %d' % (CPMmax, CPMavg)
+		CPMStatsStr = ',%d,%d' % (CPMmax, CPMavg)
 		dataString = "field1=" + str(CPMavg) + "&field2=" + str(CPMmax)
 		
 		i = 1
