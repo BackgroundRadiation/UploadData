@@ -28,24 +28,26 @@ device = None
 while device == None:
 	device = usb.core.find(idVendor=0x1781, idProduct=0x08e9)
 	if device == None:
-	    raise sys.stderr.write(str(datetime.datetime.now()) + ': Device not found' + '\n')
-	    time.sleep(30)
+		sys.stderr.write(str(datetime.datetime.now()) + ': Device not found' + '\n')
+		time.sleep(30)
 
 reattach = False
 if device.is_kernel_driver_active(0):
-    reattach = True
-    device.detach_kernel_driver(0)	
+	reattach = True
+	device.detach_kernel_driver(0)	
 
 # set to current configuration
 device.set_configuration()
 
+print ('Date/time, CPM, CPMmax, CPMavg')
 
 #read CPM values every 1 second 
 #upload average of past 60 values every 60seconds
 i = 1
-ireset = 15
+ireset = 60 # How many points to gather before reset 
 CPMadd = 0
 CPMmax = 0
+CPMStatsStr = ',,'
 while True:
 		
 	if i<=ireset:
@@ -56,37 +58,36 @@ while True:
 				unreaddata = False
 			except Exception as e:
 				sys.stderr.write(str(datetime.datetime.now()) + ': ' + str(e) + '\n')
-			finally:
-				time.sleep(1)
-		
+				device = usb.core.find(idVendor=0x1781, idProduct=0x08e9)
+				time.sleep(30)
+				
+		time.sleep(1)
 		CPM = data[5]
 		if CPM>CPMmax:
-                    CPMmax=CPM                    
+			CPMmax=CPM
 		CPMadd = CPMadd+CPM
 		#print("CPMadd=",CPMadd)
-		print(str(datetime.datetime.now()) + ": CPM=",CPM)
-		#print("i = ",i)
-		i = i +1 
+		print(str(datetime.datetime.now()) + ", %d" % CPM + CPMStatsStr)
+		CPMStatsStr = ',,'
+		i = i + 1 
 	
-
 	else:
-                CPMavg = CPMadd/ireset
-		print(str(datetime.datetime.now()) + ": CPMavg=",CPMavg)
-		print(str(datetime.datetime.now()) + ": CPMmax=",CPMmax)
+		CPMavg = CPMadd/ireset
+		CPMStatsStr = ', %d, %d' % (CPMmax, CPMavg)
 		dataString = "field1=" + str(CPMavg) + "&field2=" + str(CPMmax)
 		
 		i = 1
 		CPMadd = 0
 		CPMmax=0
-    		#  publish data to channel using parameters for MQTT 
-    		try:
+			#  publish data to channel using parameters for MQTT 
+			try:
 				publish.single(myChannel, payload=dataString, hostname=mqttHost, port=tPort, tls=tTLS, transport=tTransport)
 		except (KeyboardInterrupt):
-        		break
-		except:
-        		print (str(datetime.datetime.now()) + ": Data was not uploaded.")
-                
+				break
+		except Exception as e:
+				sys.stderr.write(str(datetime.datetime.now()) + ": Data was not uploaded - " + str(e))
+				
 usb.util.dispose_resources(dev)
 
 if reattach:
-    device.attach_kernel_driver(0)
+	device.attach_kernel_driver(0)
