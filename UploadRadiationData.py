@@ -5,6 +5,7 @@ import paho.mqtt.publish as publish
 import usb.core
 import usb.util
 import time
+import sys
   
 #Set channel Identification
 ID = "264331"
@@ -41,7 +42,16 @@ CPMmax=0
 while True:
 	
 	if i<=60:
-		data = device.read(0X81,15)
+		readdata = True
+		while readdata:
+			try:
+				data = device.read(0X81,15)
+				readdata = False
+			except Exception as e:
+				raise e
+			finally:
+				pass
+		
 		CPM = data[5]
 		if CPM>CPMmax:
                     CPMmax=CPM                    
