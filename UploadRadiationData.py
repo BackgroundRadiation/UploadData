@@ -30,6 +30,7 @@ log_file.flush()
 
 #look for required usb device (find id from lsusb in command line)
 device = None
+reattach = False
 def ConnectToDevice():
 	while device is None:
 		device = usb.core.find(idVendor=0x1781, idProduct=0x08e9)
@@ -37,13 +38,14 @@ def ConnectToDevice():
 			sys.stderr.write(str(datetime.datetime.now()) + ': Device not found' + '\n')
 			time.sleep(30)
 
-	reattach = False
 	if device.is_kernel_driver_active(0):
 		reattach = True
 		device.detach_kernel_driver(0)	
 
 	# set to current configuration
 	device.set_configuration()
+
+ConnectToDevice()
 
 #read CPM values every 1 second 
 #upload average of past 60 values every 60seconds
