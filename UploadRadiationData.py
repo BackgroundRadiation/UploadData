@@ -22,6 +22,10 @@ tTransport = "tcp"
 tPort = 1883
 tTLS = None
 
+#Set up logging
+log_directory = '/home/pi/logs/radiation.txt'
+log_file = open(log_directory, 'a')
+log_file.write('Date/time, CPM, CPMmax, CPMavg')
 
 #look for required usb device (find id from lsusb in command line)
 device = None
@@ -38,8 +42,6 @@ if device.is_kernel_driver_active(0):
 
 # set to current configuration
 device.set_configuration()
-
-print ('Date/time, CPM, CPMmax, CPMavg')
 
 #read CPM values every 1 second 
 #upload average of past 60 values every 60seconds
@@ -70,8 +72,7 @@ while True:
 		if CPM>CPMmax:
 			CPMmax=CPM
 		CPMadd = CPMadd+CPM
-		#print("CPMadd=",CPMadd)
-		print(str(datetime.datetime.now()) + ",%d" % CPM + CPMStatsStr)
+		log_file.write(str(datetime.datetime.now()) + ",%d" % CPM + CPMStatsStr)
 		CPMStatsStr = ',,'
 		i = i + 1 
 	
@@ -83,7 +84,7 @@ while True:
 		i = 1
 		CPMadd = 0
 		CPMmax=0
-			#  publish data to channel using parameters for MQTT 
+		#  publish data to channel using parameters for MQTT 
 		try:
 			publish.single(myChannel, payload=dataString, hostname=mqttHost, port=tPort, tls=tTLS, transport=tTransport)
 		except (KeyboardInterrupt):
