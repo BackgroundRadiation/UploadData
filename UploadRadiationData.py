@@ -29,8 +29,8 @@ log_file.write('Date/time, CPM, CPMmax, CPMavg\n')
 log_file.flush()
 
 #look for required usb device (find id from lsusb in command line)
+device = None
 def ConnectToDevice():
-	device = None
 	while device is None:
 		device = usb.core.find(idVendor=0x1781, idProduct=0x08e9)
 		if device is None:
