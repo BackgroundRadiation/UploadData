@@ -32,11 +32,12 @@ log_file.flush()
 device = None
 reattach = False
 def ConnectToDevice():
+	global device
 	while device is None:
 		device = usb.core.find(idVendor=0x1781, idProduct=0x08e9)
 		if device is None:
 			sys.stderr.write(str(datetime.datetime.now()) + ': Device not found' + '\n')
-			time.sleep(30)
+			time.sleep(10)
 
 	if device.is_kernel_driver_active(0):
 		reattach = True
@@ -65,6 +66,7 @@ while True:
 			except Exception as e:
 				sys.stderr.write(str(datetime.datetime.now()) + ': ' + str(e) + '\n')
 				usb.util.dispose_resources(device) # Free the USB resource
+				device = None
 				ConnectToDevice()
 				
 		time.sleep(1)
