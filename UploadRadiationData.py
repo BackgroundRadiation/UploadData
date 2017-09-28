@@ -29,20 +29,21 @@ log_file.write('Date/time, CPM, CPMmax, CPMavg\n')
 log_file.flush()
 
 #look for required usb device (find id from lsusb in command line)
-device = None
-while device is None:
-	device = usb.core.find(idVendor=0x1781, idProduct=0x08e9)
-	if device is None:
-		sys.stderr.write(str(datetime.datetime.now()) + ': Device not found' + '\n')
-		time.sleep(30)
+def ConnectToDevice():
+	device = None
+	while device is None:
+		device = usb.core.find(idVendor=0x1781, idProduct=0x08e9)
+		if device is None:
+			sys.stderr.write(str(datetime.datetime.now()) + ': Device not found' + '\n')
+			time.sleep(30)
 
-reattach = False
-if device.is_kernel_driver_active(0):
-	reattach = True
-	device.detach_kernel_driver(0)	
+	reattach = False
+	if device.is_kernel_driver_active(0):
+		reattach = True
+		device.detach_kernel_driver(0)	
 
-# set to current configuration
-device.set_configuration()
+	# set to current configuration
+	device.set_configuration()
 
 #read CPM values every 1 second 
 #upload average of past 60 values every 60seconds
@@ -62,11 +63,7 @@ while True:
 			except Exception as e:
 				sys.stderr.write(str(datetime.datetime.now()) + ': ' + str(e) + '\n')
 				usb.util.dispose_resources(device) # Free the USB resource
-				device = usb.core.find(idVendor=0x1781, idProduct=0x08e9) # Find the new USB location
-				if device.is_kernel_driver_active(0): 
-					device.detach_kernel_driver(0) # If it's occupied, free it
-				device.set_configuration() # Setup the USB drive to be used again
-				time.sleep(30)
+				ConnectToDevice()
 				
 		time.sleep(1)
 		CPM = data[5]
