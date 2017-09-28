@@ -94,7 +94,7 @@ while True:
 		except Exception as e:
 			sys.stderr.write(str(datetime.datetime.now()) + ": Data was not uploaded - " + str(e) + '\n')
 				
+log_file.close()
 usb.util.dispose_resources(dev)
-
 if reattach:
 	device.attach_kernel_driver(0)
