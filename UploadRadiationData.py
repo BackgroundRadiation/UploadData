@@ -25,7 +25,7 @@ tTLS = None
 #Set up logging
 log_directory = '/home/pi/logs/radiation.txt'
 log_file = open(log_directory, 'a')
-log_file.write('Date/time, CPM, CPMmax, CPMavg')
+log_file.write('Date/time, CPM, CPMmax, CPMavg\n')
 
 #look for required usb device (find id from lsusb in command line)
 device = None
@@ -72,7 +72,7 @@ while True:
 		if CPM>CPMmax:
 			CPMmax=CPM
 		CPMadd = CPMadd+CPM
-		log_file.write(str(datetime.datetime.now()) + ",%d" % CPM + CPMStatsStr)
+		log_file.write(str(datetime.datetime.now()) + ",%d" % CPM + CPMStatsStr + '\n')
 		CPMStatsStr = ',,'
 		i = i + 1 
 	
