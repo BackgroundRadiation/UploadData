@@ -26,6 +26,7 @@ tTLS = None
 log_directory = '/home/pi/logs/radiation.txt'
 log_file = open(log_directory, 'a')
 log_file.write('Date/time, CPM, CPMmax, CPMavg\n')
+log_file.flush()
 
 #look for required usb device (find id from lsusb in command line)
 device = None
@@ -60,11 +61,11 @@ while True:
 				unreaddata = False
 			except Exception as e:
 				sys.stderr.write(str(datetime.datetime.now()) + ': ' + str(e) + '\n')
-				usb.util.dispose_resources(dev) # Free the USB resource
+				usb.util.dispose_resources(device) # Free the USB resource
 				device = usb.core.find(idVendor=0x1781, idProduct=0x08e9) # Find the new USB location
-				if dev.is_kernel_driver_active(0): 
-					dev.detach_kernel_driver(0) # If it's occupied, free it
-				dev.set_configuration() # Setup the USB drive to be used again
+				if device.is_kernel_driver_active(0): 
+					device.detach_kernel_driver(0) # If it's occupied, free it
+				device.set_configuration() # Setup the USB drive to be used again
 				time.sleep(30)
 				
 		time.sleep(1)
@@ -73,6 +74,7 @@ while True:
 			CPMmax=CPM
 		CPMadd = CPMadd+CPM
 		log_file.write(str(datetime.datetime.now()) + ",%d" % CPM + CPMStatsStr + '\n')
+		log_file.flush()
 		CPMStatsStr = ',,'
 		i = i + 1 
 	
